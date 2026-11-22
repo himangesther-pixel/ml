@@ -1,0 +1,305 @@
+
+
+## 1. Naïve Bayes Classifier
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, f1_score, roc_auc_score
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+acc = accuracy_score(y_test, y_pred)
+error = 1 - acc
+recall = recall_score(y_test, y_pred)
+specificity = tn / (tn + fp)
+f1 = f1_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_prob)
+cv_acc = cross_val_score(model, X, y, cv=5).mean()
+
+print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
+print(f"Accuracy: {acc:.4f}, Error Rate: {error:.4f}")
+print(f"Recall: {recall:.4f}, Specificity: {specificity:.4f}")
+print(f"F1-Score: {f1:.4f}, AUC: {auc:.4f}")
+print(f"5-Fold CV Mean Accuracy: {cv_acc:.4f}")
+```
+
+### Output
+```text
+TP: 71, TN: 40, FP: 3, FN: 0
+Accuracy: 0.9737, Error Rate: 0.0263
+Recall: 1.0000, Specificity: 0.9302
+F1-Score: 0.9793, AUC: 0.9984
+5-Fold CV Mean Accuracy: 0.9385
+```
+
+---
+
+## 4. Polynomial Regression
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+X, y = load_diabetes(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+cv_r2 = cross_val_score(model, X, y, cv=5, scoring='r2').mean()
+
+print(f"MSE: {mse:.4f}")
+print(f"R2 Score: {r2:.4f}")
+print(f"5-Fold CV Mean R2: {cv_r2:.4f}")
+```
+
+### Output
+```text
+MSE: 3096.0283
+R2 Score: 0.4156
+5-Fold CV Mean R2: 0.3915
+```
+
+---
+
+## 5. Lasso and Ridge Regression
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import Lasso, Ridge
+from sklearn.metrics import mean_squared_error, r2_score
+
+X, y = load_diabetes(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Lasso Regression
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+y_pred_lasso = lasso.predict(X_test)
+print(f"Lasso -> MSE: {mean_squared_error(y_test, y_pred_lasso):.4f}, R2: {r2_score(y_test, y_pred_lasso):.4f}, 5-Fold CV R2: {cross_val_score(lasso, X, y, cv=5, scoring='r2').mean():.4f}")
+
+# Ridge Regression
+ridge = Ridge(alpha=1.0)
+ridge.fit(X_train, y_train)
+y_pred_ridge = ridge.predict(X_test)
+print(f"Ridge -> MSE: {mean_squared_error(y_test, y_pred_ridge):.4f}, R2: {r2_score(y_test, y_pred_ridge):.4f}, 5-Fold CV R2: {cross_val_score(ridge, X, y, cv=5, scoring='r2').mean():.4f}")
+```
+
+### Output
+```text
+Lasso -> MSE: 2798.1935, R2: 0.4719, 5-Fold CV R2: 0.4799
+Ridge -> MSE: 3077.4159, R2: 0.4192, 5-Fold CV R2: 0.4102
+```
+
+---
+
+## 7. Artificial Neural Network (ANN)
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, f1_score, roc_auc_score
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = MLPClassifier(max_iter=500, random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+acc = accuracy_score(y_test, y_pred)
+error = 1 - acc
+recall = recall_score(y_test, y_pred)
+specificity = tn / (tn + fp)
+f1 = f1_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_prob)
+cv_acc = cross_val_score(model, scaler.fit_transform(X), y, cv=5).mean()
+
+print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
+print(f"Accuracy: {acc:.4f}, Error Rate: {error:.4f}")
+print(f"Recall: {recall:.4f}, Specificity: {specificity:.4f}")
+print(f"F1-Score: {f1:.4f}, AUC: {auc:.4f}")
+print(f"5-Fold CV Mean Accuracy: {cv_acc:.4f}")
+```
+
+### Output
+```text
+TP: 70, TN: 41, FP: 2, FN: 1
+Accuracy: 0.9737, Error Rate: 0.0263
+Recall: 0.9859, Specificity: 0.9535
+F1-Score: 0.9790, AUC: 0.9964
+5-Fold CV Mean Accuracy: 0.9772
+```
+
+---
+
+## 8. K-NN Classifier
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, f1_score, roc_auc_score
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+acc = accuracy_score(y_test, y_pred)
+error = 1 - acc
+recall = recall_score(y_test, y_pred)
+specificity = tn / (tn + fp)
+f1 = f1_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_prob)
+cv_acc = cross_val_score(model, scaler.fit_transform(X), y, cv=5).mean()
+
+print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
+print(f"Accuracy: {acc:.4f}, Error Rate: {error:.4f}")
+print(f"Recall: {recall:.4f}, Specificity: {specificity:.4f}")
+print(f"F1-Score: {f1:.4f}, AUC: {auc:.4f}")
+print(f"5-Fold CV Mean Accuracy: {cv_acc:.4f}")
+```
+
+### Output
+```text
+TP: 68, TN: 40, FP: 3, FN: 3
+Accuracy: 0.9474, Error Rate: 0.0526
+Recall: 0.9577, Specificity: 0.9302
+F1-Score: 0.9577, AUC: 0.9820
+5-Fold CV Mean Accuracy: 0.9649
+```
+
+---
+
+## 10. SVM Classification
+
+### Python Code (`.py`)
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, f1_score, roc_auc_score
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = SVC(probability=True, random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+acc = accuracy_score(y_test, y_pred)
+error = 1 - acc
+recall = recall_score(y_test, y_pred)
+specificity = tn / (tn + fp)
+f1 = f1_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_prob)
+cv_acc = cross_val_score(model, scaler.fit_transform(X), y, cv=5).mean()
+
+print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
+print(f"Accuracy: {acc:.4f}, Error Rate: {error:.4f}")
+print(f"Recall: {recall:.4f}, Specificity: {specificity:.4f}")
+print(f"F1-Score: {f1:.4f}, AUC: {auc:.4f}")
+print(f"5-Fold CV Mean Accuracy: {cv_acc:.4f}")
+```
+
+### Output
+```text
+TP: 71, TN: 41, FP: 2, FN: 0
+Accuracy: 0.9825, Error Rate: 0.0175
+Recall: 1.0000, Specificity: 0.9535
+F1-Score: 0.9861, AUC: 0.9974
+5-Fold CV Mean Accuracy: 0.9736
+```
+
+---
+
+## 12. Hierarchical Clustering
+
+### Python Code (`.py`)
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+iris = load_iris()
+X = iris.data
+y_true = iris.target
+
+# Agglomerative Clustering
+hc = AgglomerativeClustering(n_clusters=3, linkage='ward')
+y_hc = hc.fit_predict(X)
+
+# Cross-tabulation against true labels
+ct = pd.crosstab(y_true, y_hc, rownames=['True Species'], colnames=['Hierarchical Clusters'])
+ct.index = iris.target_names
+print("Cross-tabulation of True Labels vs Hierarchical Clusters:")
+print(ct)
+
+# Dendrogram Plot
+plt.figure(figsize=(10, 5))
+dendrogram(linkage(X[:30], method='ward'))
+plt.title('Hierarchical Clustering Dendrogram (First 30 Samples)')
+plt.xlabel('Sample Index')
+plt.ylabel('Euclidean Distance')
+plt.show()
+```
+
+### Output
+```text
+Cross-tabulation of True Labels vs Hierarchical Clusters:
+Hierarchical Clusters   0   1   2
+setosa                  0  50   0
+versicolor             49   0   1
+virginica              15   0  35
+
+[Generated Hierarchical Clustering Dendrogram plotting Sample Index vs. Euclidean Distance using Ward linkage]
+```
